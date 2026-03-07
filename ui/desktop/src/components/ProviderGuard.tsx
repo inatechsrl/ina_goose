@@ -20,8 +20,9 @@ import {
   trackOnboardingAbandoned,
   trackOnboardingSetupFailed,
 } from '../utils/analytics';
+import brandIcon from '../images/logo-transparent.png';
 
-import { Goose, OpenRouter, Tetrate, ChatGPT } from './icons';
+import { OpenRouter, Tetrate, ChatGPT } from './icons';
 
 interface ProviderGuardProps {
   didSelectProvider: boolean;
@@ -331,13 +332,15 @@ export default function ProviderGuard({ didSelectProvider, children }: ProviderG
               <div className="text-left mb-8 sm:mb-12">
                 <div className="space-y-3 sm:space-y-4">
                   <div className="origin-bottom-left goose-icon-animation">
-                    <Goose className="size-6 sm:size-8" />
+                    <img src={brandIcon} alt="Agent Core logo" className="h-7 sm:h-9 w-auto" />
                   </div>
-                  <h1 className="text-2xl sm:text-4xl font-light text-left">Welcome to Goose</h1>
+                  <h1 className="text-2xl sm:text-4xl font-light text-left">
+                    Welcome to Agent Core
+                  </h1>
                 </div>
                 <p className="text-text-secondary text-base sm:text-lg mt-4 sm:mt-6">
-                  Since it’s your first time here, let’s get you set up with an AI provider so goose
-                  can work its magic.
+                  Since it’s your first time here, let’s get you set up with an AI provider so Agent
+                  Core can work its magic.
                 </p>
               </div>
 

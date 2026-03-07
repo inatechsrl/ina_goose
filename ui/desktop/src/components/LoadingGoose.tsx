@@ -1,6 +1,4 @@
-import GooseLogo from './GooseLogo';
 import AnimatedIcons from './AnimatedIcons';
-import FlyingBird from './FlyingBird';
 import { ChatState } from '../types/chatState';
 
 interface LoadingGooseProps {
@@ -10,23 +8,23 @@ interface LoadingGooseProps {
 
 const STATE_MESSAGES: Record<ChatState, string> = {
   [ChatState.LoadingConversation]: 'loading conversation...',
-  [ChatState.Thinking]: 'goose is thinking…',
-  [ChatState.Streaming]: 'goose is working on it…',
-  [ChatState.WaitingForUserInput]: 'goose is waiting…',
-  [ChatState.Compacting]: 'goose is compacting the conversation...',
-  [ChatState.Idle]: 'goose is working on it…',
+  [ChatState.Thinking]: 'Agent Core is thinking...',
+  [ChatState.Streaming]: 'Agent Core is working on it...',
+  [ChatState.WaitingForUserInput]: 'Agent Core is waiting...',
+  [ChatState.Compacting]: 'Agent Core is compacting the conversation...',
+  [ChatState.Idle]: 'Agent Core is working on it...',
   [ChatState.RestartingAgent]: 'restarting session...',
 };
 
 const STATE_ICONS: Record<ChatState, React.ReactNode> = {
   [ChatState.LoadingConversation]: <AnimatedIcons className="flex-shrink-0" cycleInterval={600} />,
   [ChatState.Thinking]: <AnimatedIcons className="flex-shrink-0" cycleInterval={600} />,
-  [ChatState.Streaming]: <FlyingBird className="flex-shrink-0" cycleInterval={150} />,
+  [ChatState.Streaming]: <AnimatedIcons className="flex-shrink-0" cycleInterval={600} />,
   [ChatState.WaitingForUserInput]: (
     <AnimatedIcons className="flex-shrink-0" cycleInterval={600} variant="waiting" />
   ),
   [ChatState.Compacting]: <AnimatedIcons className="flex-shrink-0" cycleInterval={600} />,
-  [ChatState.Idle]: <GooseLogo size="small" hover={false} />,
+  [ChatState.Idle]: <AnimatedIcons className="flex-shrink-0" cycleInterval={600} />,
   [ChatState.RestartingAgent]: <AnimatedIcons className="flex-shrink-0" cycleInterval={600} />,
 };
 

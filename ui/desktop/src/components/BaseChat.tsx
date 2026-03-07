@@ -40,7 +40,7 @@ import CreateRecipeFromSessionModal from './recipes/CreateRecipeFromSessionModal
 import { toastSuccess } from '../toasts';
 import { Recipe } from '../recipe';
 import { useAutoSubmit } from '../hooks/useAutoSubmit';
-import { Goose } from './icons';
+import brandIcon from '../images/logo-transparent.png';
 import EnvironmentBadge from './GooseSidebar/EnvironmentBadge';
 
 const CurrentModelContext = createContext<{ model: string; mode: string } | null>(null);
@@ -391,19 +391,14 @@ export default function BaseChat({
 
         {/* Chat container with sticky recipe header */}
         <div className="flex flex-col flex-1 mb-0.5 min-h-0 relative">
-          {/* Goose watermark - top right */}
+          {/* Agent Core watermark - top right */}
           <div className="absolute top-3 right-4 z-[60] flex flex-row items-center gap-1">
-            <a
-              href="https://block.github.io/goose"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="no-drag flex flex-row items-center gap-1 hover:opacity-80 transition-opacity"
-            >
-              <Goose className="size-5 goose-icon-animation" />
-              <span className="text-sm leading-none text-text-secondary -translate-y-px">
-                goose
+            <div className="no-drag flex flex-row items-center gap-1.5">
+              <img src={brandIcon} alt="Agent Core logo" className="h-4 w-auto object-contain" />
+              <span className="text-sm text-text-secondary">
+                Agent Core
               </span>
-            </a>
+            </div>
             <EnvironmentBadge className="translate-y-px" />
           </div>
 

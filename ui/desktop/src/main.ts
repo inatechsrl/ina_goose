@@ -52,6 +52,8 @@ import { GooseApp } from './api';
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 import { BLOCKED_PROTOCOLS, WEB_PROTOCOLS } from './utils/urlSecurity';
 
+const APP_NAME = 'Agent Core';
+
 function shouldSetupUpdater(): boolean {
   // Setup updater if either the flag is enabled OR dev updates are enabled
   return UPDATES_ENABLED || process.env.ENABLE_DEV_UPDATES === 'true';
@@ -109,6 +111,7 @@ async function configureProxy() {
 }
 
 if (started) app.quit();
+app.setName(APP_NAME);
 
 // Accept self-signed certificates from the local goosed server.
 // Both certificate-error (renderer) and setCertificateVerifyProc (main-process
@@ -386,7 +389,7 @@ app.on('open-url', async (_event, url) => {
 app.on('will-finish-launching', () => {
   if (process.platform === 'darwin') {
     app.setAboutPanelOptions({
-      applicationName: 'Goose',
+      applicationName: APP_NAME,
       applicationVersion: app.getVersion(),
     });
   }
@@ -441,7 +444,7 @@ async function handleFileOpen(filePath: string) {
 
     // Show user-friendly error notification
     new Notification({
-      title: 'Goose',
+      title: APP_NAME,
       body: `Could not open directory: ${path.basename(filePath)}`,
     }).show();
   }
@@ -537,6 +540,16 @@ interface CreateChatOptions {
   recipeParameters?: Record<string, string>;
 }
 
+const getWindowIconPath = (): string | undefined => {
+  if (process.platform === 'darwin') {
+    return path.join(__dirname, '../images/icon.icns');
+  }
+  if (process.platform === 'win32') {
+    return path.join(__dirname, '../images/app-icon-blue.ico');
+  }
+  return path.join(__dirname, '../images/icon.png');
+};
+
 const createChat = async (app: App, options: CreateChatOptions = {}) => {
   const {
     initialMessage,
@@ -591,7 +604,7 @@ const createChat = async (app: App, options: CreateChatOptions = {}) => {
     minWidth: 450,
     resizable: true,
     useContentSize: true,
-    icon: path.join(__dirname, '../images/icon.icns'),
+    icon: getWindowIconPath(),
     webPreferences: {
       spellcheck: settings.spellcheckEnabled ?? true,
       preload: path.join(__dirname, 'preload.js'),
@@ -667,7 +680,7 @@ const createChat = async (app: App, options: CreateChatOptions = {}) => {
     } else {
       dialog.showMessageBoxSync({
         type: 'error',
-        title: 'Goose Failed to Start',
+        title: `${APP_NAME} Failed to Start`,
         message: 'The backend server failed to start.',
         detail: errorLog.join('\n'),
         buttons: ['OK'],
@@ -1855,7 +1868,7 @@ async function appMain() {
 
   const shortcuts = getKeyboardShortcuts(settings);
 
-  const appMenu = menu?.items.find((item) => item.label === 'Goose');
+  const appMenu = menu?.items.find((item) => item.label === app.getName());
   if (appMenu?.submenu) {
     appMenu.submenu.insert(1, new MenuItem({ type: 'separator' }));
     if (shortcuts.settings) {
@@ -1983,7 +1996,7 @@ async function appMain() {
     if (shortcuts.focusWindow) {
       fileMenu.submenu.append(
         new MenuItem({
-          label: 'Focus Goose Window',
+          label: `Focus ${APP_NAME} Window`,
           accelerator: shortcuts.focusWindow,
           click() {
             focusWindow();
@@ -2090,13 +2103,13 @@ async function appMain() {
         helpMenu.submenu.append(new MenuItem({ type: 'separator' }));
       }
 
-      // Create the About Goose menu item with a submenu
+      // Create the About menu item with a submenu
       const aboutGooseMenuItem = new MenuItem({
-        label: 'About Goose',
+        label: `About ${APP_NAME}`,
         submenu: Menu.buildFromTemplate([]), // Start with an empty submenu for About
       });
 
-      // Add the Version menu item (display only) to the About Goose submenu
+      // Add the Version menu item (display only) to the About submenu
       if (aboutGooseMenuItem.submenu) {
         aboutGooseMenuItem.submenu.append(
           new MenuItem({
@@ -2270,7 +2283,7 @@ async function appMain() {
 
       const response = await fetch(url, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (compatible; Goose/1.0)',
+          'User-Agent': 'Mozilla/5.0 (compatible; AgentCore/1.0)',
         },
       });
 
@@ -2442,7 +2455,7 @@ app.whenReady().then(async () => {
   try {
     await appMain();
   } catch (error) {
-    dialog.showErrorBox('Goose Error', `Failed to create main window: ${error}`);
+    dialog.showErrorBox(`${APP_NAME} Error`, `Failed to create main window: ${error}`);
     app.quit();
   }
 });

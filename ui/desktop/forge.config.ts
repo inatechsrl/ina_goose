@@ -5,10 +5,12 @@ const { resolve } = require('path');
 let cfg = {
   asar: true,
   extraResource: ['src/bin', 'src/images', 'src/sandbox'],
-  icon: 'src/images/icon',
+  name: 'Agent Core',
+  executableName: 'agent-core',
+  icon: 'src/images/app-icon-blue',
   // Windows specific configuration
   win32: {
-    icon: 'src/images/icon.ico',
+    icon: 'src/images/app-icon-blue.ico',
     certificateFile: process.env.WINDOWS_CERTIFICATE_FILE,
     signingRole: process.env.WINDOW_SIGNING_ROLE,
     rfc3161TimeStampServer: 'http://timestamp.digicert.com',
@@ -33,8 +35,8 @@ let cfg = {
       },
     ],
     // Usage descriptions for macOS TCC (Transparency, Consent, and Control)
-    NSCalendarsUsageDescription: 'Goose needs access to your calendars to help manage and query calendar events.',
-    NSRemindersUsageDescription: 'Goose needs access to your reminders to help manage and query reminders.',
+    NSCalendarsUsageDescription: 'Agent Core needs access to your calendars to help manage and query calendar events.',
+    NSRemindersUsageDescription: 'Agent Core needs access to your reminders to help manage and query reminders.',
   },
 };
 
@@ -61,15 +63,15 @@ module.exports = {
       config: {
         arch: process.env.ELECTRON_ARCH === 'x64' ? ['x64'] : ['arm64'],
         options: {
-          icon: 'src/images/icon.ico',
+          icon: 'src/images/app-icon-blue.ico',
         },
       },
     },
     {
       name: '@electron-forge/maker-deb',
       config: {
-        name: 'Goose',
-        bin: 'Goose',
+        name: 'agent-core',
+        bin: 'agent-core',
         maintainer: 'Block, Inc.',
         homepage: 'https://block.github.io/goose/',
         categories: ['Development'],
@@ -83,8 +85,8 @@ module.exports = {
     {
       name: '@electron-forge/maker-rpm',
       config: {
-        name: 'Goose',
-        bin: 'Goose',
+        name: 'agent-core',
+        bin: 'agent-core',
         maintainer: 'Block, Inc.',
         homepage: 'https://block.github.io/goose/',
         categories: ['Development'],
@@ -100,7 +102,7 @@ module.exports = {
       name: '@electron-forge/maker-flatpak',
       config: {
         options: {
-          id: 'io.github.block.Goose',
+          id: 'io.github.block.AgentCore',
           categories: ['Development'],
           icon: {
             'scalable': 'src/images/icon.svg',
@@ -109,7 +111,7 @@ module.exports = {
           homepage: 'https://block.github.io/goose/',
           runtimeVersion: '25.08',
           baseVersion: '25.08',
-          bin: 'Goose',
+          bin: 'agent-core',
           modules: [
             {
               name: 'libbz2-shim',

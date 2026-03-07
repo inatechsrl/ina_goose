@@ -1,4 +1,4 @@
-import { Goose, Rain } from './icons/Goose';
+import brandIcon from '../images/logo-transparent.png';
 import { cn } from '../utils';
 
 interface GooseLogoProps {
@@ -14,14 +14,12 @@ export default function GooseLogo({
 }: GooseLogoProps) {
   const sizes = {
     default: {
-      frame: 'w-16 h-16',
-      rain: 'w-[275px] h-[275px]',
-      goose: 'w-16 h-16',
+      frame: 'w-28 h-9',
+      icon: 'w-full h-full',
     },
     small: {
-      frame: 'w-8 h-8',
-      rain: 'w-[150px] h-[150px]',
-      goose: 'w-8 h-8',
+      frame: 'w-16 h-5',
+      icon: 'w-full h-full',
     },
   } as const;
 
@@ -36,14 +34,15 @@ export default function GooseLogo({
         hover && 'group/with-hover'
       )}
     >
-      <Rain
+        <img
+        src={brandIcon}
+        alt="Agent Core logo"
         className={cn(
-          currentSize.rain,
-          'absolute left-0 bottom-0 transition-all duration-300 z-1',
-          hover && 'opacity-0 group-hover/with-hover:opacity-100'
+          currentSize.icon,
+          'absolute left-0 bottom-0 z-2 transition-transform duration-300 object-contain object-left',
+          hover && 'group-hover/with-hover:scale-105'
         )}
       />
-      <Goose className={cn(currentSize.goose, 'absolute left-0 bottom-0 z-2')} />
     </div>
   );
 }
