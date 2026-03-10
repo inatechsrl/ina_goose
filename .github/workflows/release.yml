@@ -107,7 +107,7 @@ jobs:
           subject-path: |
             goose-*.tar.bz2
             goose-*.zip
-            Goose*.zip
+            Agent Core*.zip
             *.deb
             *.rpm
             *.flatpak
@@ -121,7 +121,7 @@ jobs:
           artifacts: |
             goose-*.tar.bz2
             goose-*.zip
-            Goose*.zip
+            Agent Core*.zip
             *.deb
             *.rpm
             *.flatpak
@@ -140,7 +140,7 @@ jobs:
           artifacts: |
             goose-*.tar.bz2
             goose-*.zip
-            Goose*.zip
+            Agent Core*.zip
             *.deb
             *.rpm
             *.flatpak

@@ -48,8 +48,8 @@ module.exports = {
       name: '@electron-forge/publisher-github',
       config: {
         repository: {
-          owner: process.env.GITHUB_OWNER || 'block',
-          name: process.env.GITHUB_REPO || 'goose',
+          owner: process.env.GITHUB_OWNER || 'inatechsrl',
+          name: process.env.GITHUB_REPO || 'ina_goose',
         },
         prerelease: false,
         draft: true,
@@ -72,8 +72,8 @@ module.exports = {
       config: {
         name: 'agent-core',
         bin: 'agent-core',
-        maintainer: 'Block, Inc.',
-        homepage: 'https://block.github.io/goose/',
+        maintainer: 'Inatech',
+        homepage: 'https://github.com/inatechsrl/ina_goose',
         categories: ['Development'],
         desktopTemplate: './forge.deb.desktop',
         options: {
@@ -87,8 +87,8 @@ module.exports = {
       config: {
         name: 'agent-core',
         bin: 'agent-core',
-        maintainer: 'Block, Inc.',
-        homepage: 'https://block.github.io/goose/',
+        maintainer: 'Inatech',
+        homepage: 'https://github.com/inatechsrl/ina_goose',
         categories: ['Development'],
         desktopTemplate: './forge.rpm.desktop',
         options: {
@@ -102,13 +102,13 @@ module.exports = {
       name: '@electron-forge/maker-flatpak',
       config: {
         options: {
-          id: 'io.github.block.AgentCore',
+          id: 'io.github.inatechsrl.AgentCore',
           categories: ['Development'],
           icon: {
             'scalable': 'src/images/icon.svg',
             '512x512': 'src/images/icon-512.png',
           },
-          homepage: 'https://block.github.io/goose/',
+          homepage: 'https://github.com/inatechsrl/ina_goose',
           runtimeVersion: '25.08',
           baseVersion: '25.08',
           bin: 'agent-core',

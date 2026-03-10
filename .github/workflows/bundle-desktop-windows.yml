@@ -146,11 +146,11 @@ jobs:
         shell: bash
         run: |
           cd ui/desktop
-          mkdir -p ./out/Goose-win32-x64/resources/bin
-          cp -r src/bin/* out/Goose-win32-x64/resources/bin/
+          mkdir -p "./out/Agent Core-win32-x64/resources/bin"
+          cp -r src/bin/* "./out/Agent Core-win32-x64/resources/bin/"
 
           mkdir -p ./dist-windows
-          cp -r ./out/Goose-win32-x64/* ./dist-windows/
+          cp -r "./out/Agent Core-win32-x64/"* ./dist-windows/
 
           echo "📋 Final flat distribution structure:"
           ls -la ./dist-windows/
@@ -189,9 +189,9 @@ jobs:
             --alias windows-codesign \
             --certfile "${GITHUB_WORKSPACE}/block-codesign-cert.pem" \
             --tsaurl "http://timestamp.digicert.com" \
-            --name "Goose" \
-            --url "https://github.com/block/goose" \
-            "Goose.exe"
+            --name "Agent Core" \
+            --url "https://github.com/inatechsrl/ina_goose" \
+            "agent-core.exe"
 
           echo "✅ Main executable Goose.exe signed successfully"
 
@@ -205,8 +205,8 @@ jobs:
             --alias windows-codesign \
             --certfile "${GITHUB_WORKSPACE}/block-codesign-cert.pem" \
             --tsaurl "http://timestamp.digicert.com" \
-            --name "Goose Backend" \
-            --url "https://github.com/block/goose" \
+            --name "Agent Core Backend" \
+            --url "https://github.com/inatechsrl/ina_goose" \
             "goosed.exe"
 
           echo "✅ Backend executable goosed.exe signed successfully"
@@ -214,8 +214,8 @@ jobs:
           # Show final file status
           echo "📋 Final signed files:"
           cd ../../
-          ls -la Goose.exe
-          sha256sum Goose.exe
+          ls -la agent-core.exe
+          sha256sum agent-core.exe
           ls -la resources/bin/goosed.exe
           sha256sum resources/bin/goosed.exe
 
@@ -227,8 +227,8 @@ jobs:
         run: |
           echo "📋 Verifying both signed executables in final distribution:"
           echo "Main executable:"
-          Get-Item ui/desktop/dist-windows/Goose.exe
-          $sig = Get-AuthenticodeSignature ui/desktop/dist-windows/Goose.exe
+          Get-Item ui/desktop/dist-windows/agent-core.exe
+          $sig = Get-AuthenticodeSignature ui/desktop/dist-windows/agent-core.exe
           if ($sig.Status -ne "Valid") { throw "Main executable signature invalid: $($sig.Status)" }
           echo "✅ Main executable signature verification passed"
 
@@ -244,16 +244,16 @@ jobs:
           cd ui/desktop
           echo "📦 Creating Windows zip package..."
 
-          7z a -tzip "Goose-win32-x64.zip" dist-windows/
+          7z a -tzip "Agent Core-win32-x64.zip" dist-windows/
 
           echo "✅ Windows zip package created:"
-          ls -la Goose-win32-x64.zip
+          ls -la "Agent Core-win32-x64.zip"
 
-          mkdir -p out/Goose-win32-x64/
-          cp Goose-win32-x64.zip out/Goose-win32-x64/
+          mkdir -p "out/Agent Core-win32-x64/"
+          cp "Agent Core-win32-x64.zip" "out/Agent Core-win32-x64/"
 
       - name: Upload Windows build artifacts
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6.0.0
         with:
-          name: Goose-win32-x64
-          path: ui/desktop/out/Goose-win32-x64/Goose-win32-x64.zip
+          name: agent-core-win32-x64
+          path: ui/desktop/out/Agent Core-win32-x64/Agent Core-win32-x64.zip

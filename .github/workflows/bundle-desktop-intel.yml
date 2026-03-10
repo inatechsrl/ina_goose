@@ -152,10 +152,10 @@ jobs:
           source_job_url="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           unsigned_url="s3://block-goose-artifacts-bucket-production/unsigned/goose-${GITHUB_SHA}-${{ github.run_id }}-intel.zip"
 
-          zip -q -u -r out/Goose-darwin-x64/Goose_intel_mac.zip entitlements.plist
+          zip -q -u -r "out/Agent Core-darwin-x64/Agent Core_intel_mac.zip" entitlements.plist
 
           # upload unsigned goose to transfer bucket so it can be passed to lambda
-          aws s3 cp --quiet out/Goose-darwin-x64/Goose_intel_mac.zip "${unsigned_url}"
+          aws s3 cp --quiet "out/Agent Core-darwin-x64/Agent Core_intel_mac.zip" "${unsigned_url}"
 
           # begin signing
           echo "🚀 launching signing process"
@@ -207,7 +207,7 @@ jobs:
 
           # download the signed app from S3
           echo "⬇️ downloading signed app"
-          aws s3 cp --quiet "${signed_url}" out/Goose-darwin-x64/Goose_intel_mac.zip
+          aws s3 cp --quiet "${signed_url}" "out/Agent Core-darwin-x64/Agent Core_intel_mac.zip"
         working-directory: ui/desktop
 
       - name: Final cleanup before artifact upload
@@ -221,26 +221,26 @@ jobs:
       - name: Upload Desktop artifact
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6.0.0
         with:
-          name: Goose-darwin-x64
-          path: ui/desktop/out/Goose-darwin-x64/Goose_intel_mac.zip
+          name: agent-core-darwin-x64
+          path: ui/desktop/out/Agent Core-darwin-x64/Agent Core_intel_mac.zip
 
       - name: Quick launch test (macOS)
         if: ${{ inputs.quick_test }}
         run: |
           # Ensure no quarantine attributes (if needed)
-          xattr -cr "ui/desktop/out/Goose-darwin-x64/Goose.app"
-          echo "Opening Goose.app..."
-          open -g "ui/desktop/out/Goose-darwin-x64/Goose.app"
+          xattr -cr "ui/desktop/out/Agent Core-darwin-x64/Agent Core.app"
+          echo "Opening Agent Core.app..."
+          open -g "ui/desktop/out/Agent Core-darwin-x64/Agent Core.app"
 
           # Give the app a few seconds to start and write logs
           sleep 5
 
           # Check if it's running
-          if pgrep -f "Goose.app/Contents/MacOS/Goose" > /dev/null; then
+          if pgrep -f "Agent Core.app/Contents/MacOS/agent-core" > /dev/null; then
             echo "App appears to be running."
           else
             echo "App did not stay open. Possible crash or startup error."
             exit 1
           fi
           # Kill the app to clean up
-          pkill -f "Goose.app/Contents/MacOS/Goose"
+          pkill -f "Agent Core.app/Contents/MacOS/agent-core"

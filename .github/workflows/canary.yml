@@ -121,7 +121,7 @@ jobs:
         with:
           subject-path: |
             goose-*.tar.bz2
-            Goose*.zip
+            Agent Core*.zip
             *.deb
             *.rpm
             *.flatpak
@@ -136,7 +136,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: |
             goose-*.tar.bz2
-            Goose*.zip
+            Agent Core*.zip
             *.deb
             *.rpm
             *.flatpak

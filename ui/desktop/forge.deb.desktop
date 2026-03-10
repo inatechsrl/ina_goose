@@ -1,7 +1,7 @@
 [Desktop Entry]
-Name=Goose
-Exec=/usr/lib/goose/Goose %U
-Icon=/usr/share/pixmaps/goose.png
+Name=Agent Core
+Exec=/usr/lib/agent-core/agent-core %U
+Icon=/usr/share/pixmaps/agent-core.png
 Terminal=false
 Type=Application
 Categories=Development;
