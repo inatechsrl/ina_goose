@@ -6,17 +6,60 @@ use std::{
 use crate::recipe::{Recipe, BUILT_IN_RECIPE_DIR_PARAM};
 use anyhow::Result;
 use minijinja::{Environment, UndefinedBehavior};
-use regex::Regex;
+use regex::{Captures, Regex};
 
 const CURRENT_TEMPLATE_NAME: &str = "recipe";
 const OPEN_BRACE: &str = "{{";
 const CLOSE_BRACE: &str = "}}";
 
+fn yaml_block(value: String, indent: usize) -> String {
+    if indent == 0 || !value.contains('\n') && !value.contains('\r') {
+        return value;
+    }
+
+    let indent_prefix = " ".repeat(indent);
+    let normalized = value.replace("\r\n", "\n");
+    let mut lines = normalized.split('\n');
+    let first_line = lines.next().unwrap_or_default();
+    let mut rendered = first_line.to_string();
+
+    for line in lines {
+        rendered.push('\n');
+        rendered.push_str(&indent_prefix);
+        rendered.push_str(line);
+    }
+
+    rendered
+}
+
+fn create_template_environment(undefined_behavior: UndefinedBehavior) -> Environment<'static> {
+    let mut env = minijinja::Environment::new();
+    env.set_undefined_behavior(undefined_behavior);
+    env.add_filter("yaml_block", yaml_block);
+    env
+}
+
+fn preprocess_multiline_block_variables(content: &str) -> String {
+    let multiline_var_re =
+        Regex::new(r"(?m)^(?P<indent>[ \t]+)\{\{\s*(?P<var>[a-zA-Z_][a-zA-Z0-9_]*)\s*\}\}\s*$")
+            .unwrap();
+
+    multiline_var_re
+        .replace_all(content, |caps: &Captures| {
+            let indent = caps.name("indent").unwrap().as_str();
+            let var = caps.name("var").unwrap().as_str();
+            let indent_width = indent.chars().count();
+            format!("{indent}{{{{ {var} | yaml_block({indent_width}) }}}}")
+        })
+        .into_owned()
+}
+
 fn preprocess_template_variables(content: &str) -> Result<String> {
-    let all_template_variables = extract_template_variables(content);
+    let content = preprocess_multiline_block_variables(content);
+    let all_template_variables = extract_template_variables(&content);
     let complex_template_variables = filter_complex_variables(&all_template_variables);
     let unparsable_template_variables = filter_unparseable_variables(&complex_template_variables)?;
-    replace_unparseable_vars_with_raw(content, &unparsable_template_variables)
+    replace_unparseable_vars_with_raw(&content, &unparsable_template_variables)
 }
 
 fn extract_template_variables(content: &str) -> Vec<String> {
@@ -47,8 +90,7 @@ fn filter_unparseable_variables(template_variables: &[String]) -> Result<Vec<Str
             continue;
         }
 
-        let mut env = Environment::new();
-        env.set_undefined_behavior(UndefinedBehavior::Lenient);
+        let env = create_template_environment(UndefinedBehavior::Lenient);
 
         let test_template = format!(
             "{open}{content}{close}",
@@ -119,8 +161,7 @@ fn add_template_in_env(
     recipe_dir: Option<String>,
     undefined_behavior: UndefinedBehavior,
 ) -> Result<Environment<'_>> {
-    let mut env = minijinja::Environment::new();
-    env.set_undefined_behavior(undefined_behavior);
+    let mut env = create_template_environment(undefined_behavior);
 
     if let Some(recipe_dir) = recipe_dir {
         env.set_loader(move |name| {
@@ -196,7 +237,9 @@ mod tests {
     mod render_content_with_params_tests {
         use std::collections::HashMap;
 
-        use crate::recipe::template_recipe::render_recipe_content_with_params;
+        use crate::recipe::template_recipe::{
+            parse_recipe_content, render_recipe_content_with_params,
+        };
 
         #[test]
         fn test_render_content_with_params() {
@@ -293,6 +336,60 @@ description: "A test recipe"
             let params = HashMap::from([("recipe_dir".to_string(), "test_dir".to_string())]);
             let result = render_recipe_content_with_params(content, &params).unwrap();
             assert_eq!(result, "{{param_key}}");
+        }
+
+        #[test]
+        fn test_multiline_standalone_variable_preserves_yaml_block_indentation() {
+            let content = r#"
+version: 1.0.0
+title: Test Recipe
+description: Rendering multiline task into prompt block
+prompt: |-
+  Header
+  {{ task }}
+parameters:
+  - key: task
+    input_type: string
+    requirement: required
+    description: Task text
+"#;
+            let params = HashMap::from([
+                ("recipe_dir".to_string(), "test_dir".to_string()),
+                (
+                    "task".to_string(),
+                    "Steps:\n1) First\n2) Second\nDeliverables:\n- Done".to_string(),
+                ),
+            ]);
+            let result = render_recipe_content_with_params(content, &params).unwrap();
+
+            assert!(result.contains("  Steps:"));
+            assert!(result.contains("  1) First"));
+            assert!(result.contains("  Deliverables:"));
+            assert!(result.contains("  - Done"));
+
+            let parsed = crate::recipe::Recipe::from_content(&result).unwrap();
+            let prompt = parsed.prompt.unwrap();
+            assert!(prompt.contains("Header\nSteps:\n1) First\n2) Second\nDeliverables:\n- Done"));
+        }
+
+        #[test]
+        fn test_parse_recipe_content_keeps_template_variable_for_multiline_block() {
+            let content = r#"
+version: 1.0.0
+title: Test Recipe
+description: Validation should still see task parameter
+prompt: |-
+  Header
+  {{ task }}
+parameters:
+  - key: task
+    input_type: string
+    requirement: required
+    description: Task text
+"#;
+
+            let (_, template_variables) = parse_recipe_content(content, None).unwrap();
+            assert!(template_variables.contains("task"));
         }
     }
 }
