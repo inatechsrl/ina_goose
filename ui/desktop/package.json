@@ -1,7 +1,7 @@
 {
   "name": "agent-core-app",
   "productName": "Agent Core",
-  "version": "1.26.0",
+  "version": "1.26.1",
   "description": "Agent Core Desktop App",
   "engines": {
     "node": "^24.10.0",
