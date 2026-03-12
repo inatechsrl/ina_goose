@@ -49,7 +49,7 @@ jobs:
       id-token: write
       contents: read
     with:
-      signing: true
+      signing: false
     secrets:
       OSX_CODESIGN_ROLE: ${{ secrets.OSX_CODESIGN_ROLE }}
 
@@ -62,7 +62,7 @@ jobs:
       id-token: write
       contents: read
     with:
-      signing: true
+      signing: false
     secrets:
       OSX_CODESIGN_ROLE: ${{ secrets.OSX_CODESIGN_ROLE }}
 
@@ -78,7 +78,7 @@ jobs:
   bundle-desktop-windows:
     uses: ./.github/workflows/bundle-desktop-windows.yml
     with:
-      signing: true
+      signing: false
     secrets:
       WINDOWS_CODESIGN_CERTIFICATE: ${{ secrets.WINDOWS_CODESIGN_CERTIFICATE }}
       WINDOW_SIGNING_ROLE: ${{ secrets.WINDOW_SIGNING_ROLE }}
