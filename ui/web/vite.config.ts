@@ -1,7 +1,43 @@
-import { defineConfig } from 'vite';
+import { defineConfig, Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
-import { resolve } from 'path';
+import { resolve, dirname } from 'path';
+
+/**
+ * Vite plugin that redirects specific desktop source files to web-specific
+ * override implementations, without modifying any desktop source files.
+ *
+ * Works by intercepting the `resolveId` hook: when Vite resolves a relative
+ * import that points to a desktop file in our override map, it returns the
+ * override file path instead.
+ */
+function webOverridesPlugin(overrides: Record<string, string>): Plugin {
+  // Normalise all keys once at startup
+  const normalisedOverrides = Object.fromEntries(
+    Object.entries(overrides).map(([k, v]) => [k.replace(/\\/g, '/'), v])
+  );
+
+  return {
+    name: 'web-overrides',
+    enforce: 'pre',
+    resolveId(id, importer) {
+      if (!importer || !id.startsWith('.')) return null;
+
+      // Resolve the relative import to an absolute path, then normalise separators
+      const abs = resolve(dirname(importer), id).replace(/\\/g, '/');
+
+      for (const [from, to] of Object.entries(normalisedOverrides)) {
+        if (abs === from || abs === from.replace(/\.(tsx?|jsx?)$/, '')) {
+          return to;
+        }
+      }
+      return null;
+    },
+  };
+}
+
+const desktop = (p: string) => resolve(__dirname, '../desktop/src', p);
+const override = (p: string) => resolve(__dirname, 'src/overrides', p);
 
 export default defineConfig({
   define: {
@@ -11,7 +47,19 @@ export default defineConfig({
     ),
   },
 
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    webOverridesPlugin({
+      // Desktop file (absolute path) → web override file (absolute path)
+      [desktop('components/bottom_menu/DirSwitcher.tsx')]:
+        override('DirSwitcher.tsx'),
+      [desktop('components/settings/app/AppSettingsSection.tsx')]:
+        override('AppSettingsSection.tsx'),
+      [desktop('components/settings/chat/SpellcheckToggle.tsx')]:
+        override('SpellcheckToggle.tsx'),
+    }),
+  ],
 
   resolve: {
     alias: {
