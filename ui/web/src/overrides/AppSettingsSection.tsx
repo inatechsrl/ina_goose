@@ -7,8 +7,11 @@
  *   - Prevent Sleep / wakelock    (OS wakelock — N/A)
  *   - "Open Notification Settings" button  (OS settings dialog — N/A)
  *
- * Everything else is kept: Theme, Navigation, Cost Tracking, Telemetry,
- * Help & Feedback, and Version.
+ * Feature-flag controlled cards:
+ *   - Help & Feedback             (appSettings.helpAndFeedback)
+ *   - Navigation                  (appSettings.navigation)
+ *   - Telemetry                   (appSettings.telemetry)
+ *   - Inatech branding on Version (appSettings.useInatechBranding)
  */
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@desktop/components/ui/button';
@@ -24,9 +27,11 @@ import { NavigationCustomizationSettings } from '@desktop/components/settings/ap
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import BlockLogoBlack from '@desktop/components/settings/app/icons/block-lockup_black.png';
 import BlockLogoWhite from '@desktop/components/settings/app/icons/block-lockup_white.png';
+import InatechLogo from '@desktop/images/icon.png';
 import { COST_TRACKING_ENABLED, UPDATES_ENABLED } from '@desktop/updates';
 import { trackSettingToggled } from '@desktop/utils/analytics';
 import UpdateSection from '@desktop/components/settings/app/UpdateSection';
+import { useFeatureFlags } from '../feature-flags';
 
 interface AppSettingsSectionProps {
   scrollToSection?: string;
@@ -98,6 +103,7 @@ export default function AppSettingsSection({ scrollToSection }: AppSettingsSecti
   const [isDarkMode, setIsDarkMode] = useState(false);
   const updateSectionRef = useRef<HTMLDivElement>(null);
   const shouldShowUpdates = !window.appConfig.get('GOOSE_VERSION');
+  const flags = useFeatureFlags();
 
   useEffect(() => {
     const updateTheme = () => {
@@ -192,46 +198,48 @@ export default function AppSettingsSection({ scrollToSection }: AppSettingsSecti
         </CardContent>
       </Card>
 
-      <NavigationSettingsCard />
+      {flags.appSettings.navigation && <NavigationSettingsCard />}
 
-      <TelemetrySettings isWelcome={false} />
+      {flags.appSettings.telemetry && <TelemetrySettings isWelcome={false} />}
 
-      <Card className="rounded-lg">
-        <CardHeader className="pb-0">
-          <CardTitle className="mb-1">Help & feedback</CardTitle>
-          <CardDescription>
-            Help us improve by reporting issues or requesting new features
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pt-4 px-4">
-          <div className="flex space-x-4">
-            <Button
-              onClick={() =>
-                window.open(
-                  'https://github.com/block/goose/issues/new?template=bug_report.md',
-                  '_blank'
-                )
-              }
-              variant="secondary"
-              size="sm"
-            >
-              Report a Bug
-            </Button>
-            <Button
-              onClick={() =>
-                window.open(
-                  'https://github.com/block/goose/issues/new?template=feature_request.md',
-                  '_blank'
-                )
-              }
-              variant="secondary"
-              size="sm"
-            >
-              Request a Feature
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      {flags.appSettings.helpAndFeedback && (
+        <Card className="rounded-lg">
+          <CardHeader className="pb-0">
+            <CardTitle className="mb-1">Help & feedback</CardTitle>
+            <CardDescription>
+              Help us improve by reporting issues or requesting new features
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-4 px-4">
+            <div className="flex space-x-4">
+              <Button
+                onClick={() =>
+                  window.open(
+                    'https://github.com/block/goose/issues/new?template=bug_report.md',
+                    '_blank'
+                  )
+                }
+                variant="secondary"
+                size="sm"
+              >
+                Report a Bug
+              </Button>
+              <Button
+                onClick={() =>
+                  window.open(
+                    'https://github.com/block/goose/issues/new?template=feature_request.md',
+                    '_blank'
+                  )
+                }
+                variant="secondary"
+                size="sm"
+              >
+                Request a Feature
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Version — shown when GOOSE_VERSION is set (e.g. '1.0.0-web') */}
       {!shouldShowUpdates && (
@@ -241,11 +249,20 @@ export default function AppSettingsSection({ scrollToSection }: AppSettingsSecti
           </CardHeader>
           <CardContent className="pt-4 px-4">
             <div className="flex items-center gap-3">
-              <img
-                src={isDarkMode ? BlockLogoWhite : BlockLogoBlack}
-                alt="Block Logo"
-                className="h-8 w-auto"
-              />
+              {flags.appSettings.useInatechBranding ? (
+                <img
+                  src={InatechLogo}
+                  alt="Inatech Logo"
+                  className="h-10 w-auto rounded"
+                  style={isDarkMode ? { background: 'white', padding: '2px 6px', borderRadius: '6px' } : undefined}
+                />
+              ) : (
+                <img
+                  src={isDarkMode ? BlockLogoWhite : BlockLogoBlack}
+                  alt="Block Logo"
+                  className="h-8 w-auto"
+                />
+              )}
               <span className="text-2xl font-mono text-black dark:text-white">
                 {String(window.appConfig.get('GOOSE_VERSION') || 'Development')}
               </span>

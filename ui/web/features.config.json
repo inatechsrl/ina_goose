@@ -1,0 +1,27 @@
+{
+  "routes": {
+    "recipes": false,
+    "extensions": false,
+    "permission": false,
+    "schedules": false
+  },
+  "settingsTabs": {
+    "localInference": false,
+    "chat": false,
+    "session": false,
+    "prompts": false,
+    "keyboard": false
+  },
+  "appSettings": {
+    "helpAndFeedback": false,
+    "navigation": false,
+    "telemetry": false,
+    "useInatechBranding": true
+  },
+  "features": {
+    "workingDirectory": false,
+    "fileAttachment": false,
+    "extensionSelection": false,
+    "recipeCreation": false
+  }
+}
