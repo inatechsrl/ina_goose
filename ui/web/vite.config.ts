@@ -58,6 +58,15 @@ export default defineConfig({
         override('AppSettingsSection.tsx'),
       [desktop('components/settings/chat/SpellcheckToggle.tsx')]:
         override('SpellcheckToggle.tsx'),
+      // Feature-flags overrides
+      [desktop('hooks/useNavigationItems.ts')]:
+        override('useNavigationItems.ts'),
+      [desktop('components/settings/SettingsView.tsx')]:
+        override('SettingsView.tsx'),
+      [desktop('components/ChatInput.tsx')]:
+        override('ChatInput.tsx'),
+      [desktop('components/bottom_menu/BottomMenuExtensionSelection.tsx')]:
+        override('BottomMenuExtensionSelection.tsx'),
     }),
   ],
 

@@ -9,6 +9,7 @@ import { FolderDot, Check, X } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@desktop/components/ui/Tooltip';
 import { updateWorkingDir } from '@desktop/api';
 import { toast } from 'react-toastify';
+import { featureFlags } from '../feature-flags';
 
 interface DirSwitcherProps {
   className: string;
@@ -29,6 +30,9 @@ export const DirSwitcher: React.FC<DirSwitcherProps> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState('');
+
+  // Feature flag: hide DirSwitcher when working directory feature is disabled
+  if (!featureFlags.features.workingDirectory) return null;
 
   const handleClick = () => {
     setInputValue(workingDir);

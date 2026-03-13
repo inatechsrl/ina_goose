@@ -31,7 +31,8 @@ interface PairRouteState {
   resumeSessionId?: string;
   initialMessage?: UserInput;
 }
-import SettingsView, { SettingsViewOptions } from '@desktop/components/settings/SettingsView';
+// Import from override directly — @desktop/ alias bypasses the webOverridesPlugin
+import SettingsView, { SettingsViewOptions } from './overrides/SettingsView';
 import SessionsView from '@desktop/components/sessions/SessionsView';
 import ProviderSettings from '@desktop/components/settings/providers/ProviderSettingsPage';
 import { AppLayout } from '@desktop/components/Layout/AppLayout';
@@ -59,6 +60,7 @@ import { getInitialWorkingDir } from '@desktop/utils/workingDir';
 import { usePageViewTracking } from '@desktop/hooks/useAnalytics';
 import { trackOnboardingCompleted, trackErrorWithContext } from '@desktop/utils/analytics';
 import { AppEvents } from '@desktop/constants/events';
+import { FeatureFlagsProvider, useFeatureFlags } from './feature-flags';
 
 function PageViewTracker() {
   usePageViewTracking();
@@ -297,6 +299,7 @@ const ExtensionsRoute = () => {
 export function WebAppInner() {
   const [fatalError, setFatalError] = useState<string | null>(null);
   const [didSelectProvider, setDidSelectProvider] = useState<boolean>(false);
+  const flags = useFeatureFlags();
 
   const navigate = useNavigate();
   const setView = useNavigation();
@@ -468,18 +471,24 @@ export function WebAppInner() {
                 }
               />
               <Route path="settings" element={<SettingsRoute />} />
-              <Route
-                path="extensions"
-                element={
-                  <ChatProvider chat={chat} setChat={setChat} contextKey="extensions">
-                    <ExtensionsRoute />
-                  </ChatProvider>
-                }
-              />
+              {flags.routes.extensions && (
+                <Route
+                  path="extensions"
+                  element={
+                    <ChatProvider chat={chat} setChat={setChat} contextKey="extensions">
+                      <ExtensionsRoute />
+                    </ChatProvider>
+                  }
+                />
+              )}
               <Route path="apps" element={<AppsView />} />
               <Route path="sessions" element={<SessionsRoute />} />
-              <Route path="schedules" element={<SchedulesRoute />} />
-              <Route path="recipes" element={<RecipesRoute />} />
+              {flags.routes.schedules && (
+                <Route path="schedules" element={<SchedulesRoute />} />
+              )}
+              {flags.routes.recipes && (
+                <Route path="recipes" element={<RecipesRoute />} />
+              )}
               <Route
                 path="shared-session"
                 element={
@@ -491,7 +500,9 @@ export function WebAppInner() {
                   />
                 }
               />
-              <Route path="permission" element={<PermissionRoute />} />
+              {flags.routes.permission && (
+                <Route path="permission" element={<PermissionRoute />} />
+              )}
             </Route>
           </Routes>
         </div>
@@ -502,13 +513,15 @@ export function WebAppInner() {
 
 export default function WebApp() {
   return (
-    <ThemeProvider>
-      <ModelAndProviderProvider>
-        <BrowserRouter>
-          <WebAppInner />
-        </BrowserRouter>
-        <TelemetryOptOutModal controlled={false} />
-      </ModelAndProviderProvider>
-    </ThemeProvider>
+    <FeatureFlagsProvider>
+      <ThemeProvider>
+        <ModelAndProviderProvider>
+          <BrowserRouter>
+            <WebAppInner />
+          </BrowserRouter>
+          <TelemetryOptOutModal controlled={false} />
+        </ModelAndProviderProvider>
+      </ThemeProvider>
+    </FeatureFlagsProvider>
   );
 }
