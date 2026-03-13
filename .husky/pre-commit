@@ -1,3 +1,4 @@
+#!/bin/sh
 # Only auto-format desktop TS code if relevant files are modified
 if git diff --cached --name-only | grep -q "^ui/desktop/"; then
   if [ -d "ui/desktop" ]; then

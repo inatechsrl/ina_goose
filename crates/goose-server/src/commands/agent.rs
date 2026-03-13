@@ -6,6 +6,7 @@ use axum_server::Handle;
 use goose_server::auth::check_token;
 use goose_server::tls::self_signed_config;
 use tower_http::cors::{Any, CorsLayer};
+use tower_http::services::{ServeDir, ServeFile};
 use tracing::info;
 
 #[cfg(unix)]
@@ -53,6 +54,16 @@ pub async fn run() -> Result<()> {
             check_token,
         ))
         .layer(cors);
+
+    let app = if let Ok(web_ui_dir) = std::env::var("GOOSE_WEB_UI_DIR") {
+        let index_html = std::path::PathBuf::from(&web_ui_dir).join("index.html");
+        info!("Serving web UI from: {}", web_ui_dir);
+        app.fallback_service(
+            ServeDir::new(&web_ui_dir).not_found_service(ServeFile::new(index_html)),
+        )
+    } else {
+        app
+    };
 
     let addr = settings.socket_addr();
     let tls_setup = self_signed_config().await?;

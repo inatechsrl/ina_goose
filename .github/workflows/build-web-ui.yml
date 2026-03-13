@@ -1,0 +1,54 @@
+# Reusable workflow to build the web UI static assets.
+# Called by release.yml (and potentially canary.yml).
+on:
+  workflow_call:
+    inputs:
+      ref:
+        type: string
+        required: false
+        default: ""
+
+name: "Reusable workflow to build Web UI"
+
+jobs:
+  build-web-ui:
+    name: Build Web UI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8  # v6.0.1
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4.4.0
+        with:
+          node-version: 20
+
+      - name: Install dependencies (acp)
+        working-directory: ui/acp
+        run: npm ci
+
+      - name: Install dependencies (desktop)
+        working-directory: ui/desktop
+        run: npm ci
+
+      - name: Install dependencies (web)
+        working-directory: ui/web
+        run: npm ci
+
+      - name: Build web UI
+        working-directory: ui/web
+        env:
+          VITE_GOOSE_API_HOST: ""
+        run: npm run build
+
+      - name: Zip dist
+        working-directory: ui/web
+        run: zip -r web-ui-dist.zip dist/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f  # v6.0.0
+        with:
+          name: web-ui-dist.zip
+          path: ui/web/web-ui-dist.zip
