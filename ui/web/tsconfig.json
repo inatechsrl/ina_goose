@@ -1,0 +1,55 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+
+    /* Paths — match vite alias */
+    "paths": {
+      "@desktop/*": ["../desktop/src/*"]
+    },
+
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* Source Maps */
+    "sourceMap": true,
+    "inlineSources": true,
+
+    /* Safety — relaxed compared to desktop because we compile desktop sources
+       in a different context (no Electron types, different React type versions) */
+    "noImplicitAny": false,
+    "strictNullChecks": true,
+    "strictFunctionTypes": false,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noImplicitReturns": false
+  },
+  "include": ["src", "../desktop/src"],
+  "exclude": [
+    "../desktop/src/test",
+    "../desktop/src/**/*.test.*",
+    "../desktop/src/**/*.spec.*",
+    "../desktop/src/main.ts",
+    "../desktop/src/preload.ts",
+    "../desktop/src/App.test.tsx"
+  ]
+}
