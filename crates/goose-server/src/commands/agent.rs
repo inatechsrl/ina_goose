@@ -48,7 +48,7 @@ pub async fn run() -> Result<()> {
         .allow_methods(Any)
         .allow_headers(Any);
 
-    let app = crate::routes::configure(app_state.clone(), secret_key.clone())
+    let api = crate::routes::configure(app_state.clone(), secret_key.clone())
         .layer(middleware::from_fn_with_state(
             secret_key.clone(),
             check_token,
@@ -58,11 +58,13 @@ pub async fn run() -> Result<()> {
     let app = if let Ok(web_ui_dir) = std::env::var("GOOSE_WEB_UI_DIR") {
         let index_html = std::path::PathBuf::from(&web_ui_dir).join("index.html");
         info!("Serving web UI from: {}", web_ui_dir);
-        app.fallback_service(
-            ServeDir::new(&web_ui_dir).not_found_service(ServeFile::new(index_html)),
-        )
+        axum::Router::new()
+            .merge(api)
+            .fallback_service(
+                ServeDir::new(&web_ui_dir).not_found_service(ServeFile::new(index_html)),
+            )
     } else {
-        app
+        api
     };
 
     let addr = settings.socket_addr();
