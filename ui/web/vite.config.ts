@@ -80,8 +80,9 @@ export default defineConfig({
       'react-dom': resolve(__dirname, 'node_modules/react-dom'),
       'react/jsx-runtime': resolve(__dirname, 'node_modules/react/jsx-runtime'),
       'react/jsx-dev-runtime': resolve(__dirname, 'node_modules/react/jsx-dev-runtime'),
+      'react-router-dom': resolve(__dirname, 'node_modules/react-router-dom'),
     },
-    dedupe: ['react', 'react-dom'],
+    dedupe: ['react', 'react-dom', 'react-router-dom'],
   },
 
   build: {
