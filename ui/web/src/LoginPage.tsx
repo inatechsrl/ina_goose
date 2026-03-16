@@ -1,4 +1,5 @@
 import React, { useState, FormEvent } from 'react';
+import logo from './logo-transparent.png';
 
 export function LoginPage() {
   const [key, setKey] = useState('');
@@ -44,8 +45,9 @@ export function LoginPage() {
         onSubmit={handleSubmit}
         className="flex flex-col items-center gap-6 w-full max-w-sm px-6"
       >
-        <h1 className="text-2xl font-semibold text-gray-100 tracking-tight">
-          Goose Web UI
+        <img src={logo} alt="INATECH" className="w-48 mb-2" />
+        <h1 className="text-xl font-semibold text-gray-100 tracking-tight">
+          Agent Core
         </h1>
 
         <input
