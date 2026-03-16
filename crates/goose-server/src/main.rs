@@ -1,3 +1,4 @@
+mod auth;
 mod commands;
 mod configuration;
 mod error;
@@ -5,6 +6,7 @@ mod logging;
 mod openapi;
 mod routes;
 mod state;
+mod tls;
 mod tunnel;
 
 use std::path::PathBuf;

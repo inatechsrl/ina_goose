@@ -5,6 +5,7 @@ use axum::{
     routing::get,
     Router,
 };
+use crate::auth::AuthState;
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -26,10 +27,10 @@ const MCP_UI_PROXY_HTML: &str = include_str!("templates/mcp_ui_proxy.html");
     )
 )]
 async fn mcp_ui_proxy(
-    axum::extract::State(secret_key): axum::extract::State<String>,
+    axum::extract::State(auth): axum::extract::State<AuthState>,
     Query(params): Query<ProxyQuery>,
 ) -> Response {
-    if params.secret != secret_key {
+    if !auth.is_valid_key(&params.secret) {
         return (StatusCode::UNAUTHORIZED, "Unauthorized").into_response();
     }
 
@@ -46,8 +47,8 @@ async fn mcp_ui_proxy(
         .into_response()
 }
 
-pub fn routes(secret_key: String) -> Router {
+pub fn routes(auth: AuthState) -> Router {
     Router::new()
         .route("/mcp-ui-proxy", get(mcp_ui_proxy))
-        .with_state(secret_key)
+        .with_state(auth)
 }

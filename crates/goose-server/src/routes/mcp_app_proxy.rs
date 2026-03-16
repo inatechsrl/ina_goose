@@ -5,6 +5,7 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
+use crate::auth::AuthState;
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -126,8 +127,8 @@ fn parse_domains(domains: Option<&String>) -> Vec<String> {
 }
 
 #[derive(Clone)]
-struct AppState {
-    secret_key: String,
+struct McpAppState {
+    auth: AuthState,
     guest_store: GuestHtmlStore,
 }
 
@@ -148,10 +149,10 @@ struct AppState {
     )
 )]
 async fn mcp_app_proxy(
-    axum::extract::State(state): axum::extract::State<AppState>,
+    axum::extract::State(state): axum::extract::State<McpAppState>,
     Query(params): Query<ProxyQuery>,
 ) -> Response {
-    if params.secret != state.secret_key {
+    if !state.auth.is_valid_key(&params.secret) {
         return (StatusCode::UNAUTHORIZED, "Unauthorized").into_response();
     }
 
@@ -190,10 +191,10 @@ async fn mcp_app_proxy(
 /// Store guest HTML and return a nonce for retrieval.
 /// The proxy page calls this via fetch, then sets the guest iframe src to /mcp-app-guest?nonce=...
 async fn store_guest_html(
-    axum::extract::State(state): axum::extract::State<AppState>,
+    axum::extract::State(state): axum::extract::State<McpAppState>,
     Json(body): Json<StoreGuestBody>,
 ) -> Response {
-    if body.secret != state.secret_key {
+    if !state.auth.is_valid_key(&body.secret) {
         return (StatusCode::UNAUTHORIZED, "Unauthorized").into_response();
     }
 
@@ -233,10 +234,10 @@ async fn store_guest_html(
 /// This gives the guest iframe `window.location.protocol === "https:"`,
 /// which is required by SDKs like Square Web Payments that check for secure context.
 async fn serve_guest_html(
-    axum::extract::State(state): axum::extract::State<AppState>,
+    axum::extract::State(state): axum::extract::State<McpAppState>,
     Query(params): Query<GuestQuery>,
 ) -> Response {
-    if params.secret != state.secret_key {
+    if !state.auth.is_valid_key(&params.secret) {
         return (StatusCode::UNAUTHORIZED, "Unauthorized").into_response();
     }
 
@@ -270,9 +271,9 @@ async fn serve_guest_html(
     }
 }
 
-pub fn routes(secret_key: String) -> Router {
-    let state = AppState {
-        secret_key,
+pub fn routes(auth: AuthState) -> Router {
+    let state = McpAppState {
+        auth,
         guest_store: Arc::new(RwLock::new(HashMap::new())),
     };
 

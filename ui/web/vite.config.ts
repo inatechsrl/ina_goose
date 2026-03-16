@@ -107,7 +107,7 @@ export default defineConfig({
       // browser navigations carry `Accept: text/html` and no X-Secret-Key header →
       // serve index.html (SPA). API calls from the React app carry X-Secret-Key →
       // proxy to goosed.
-      '^/(reply|action-required|agent|dictation|local-inference|config|recipes|sessions|schedule|schedules|status|telemetry|tunnel|gateway|mcp-ui-proxy|mcp-app-proxy|mcp-app-guest|handle_openrouter|handle_tetrate|search)': {
+      '^/(reply|action-required|agent|auth|dictation|local-inference|config|recipes|sessions|schedule|schedules|status|telemetry|tunnel|gateway|mcp-ui-proxy|mcp-app-proxy|mcp-app-guest|handle_openrouter|handle_tetrate|search)': {
         target: process.env.GOOSE_API_HOST || 'https://localhost:3000',
         changeOrigin: true,
         secure: false, // accept self-signed TLS certs
@@ -116,8 +116,8 @@ export default defineConfig({
           // If the request looks like browser navigation (accepts HTML and has no
           // API secret key), serve the SPA instead of proxying to goosed.
           const accept = req.headers['accept'] ?? '';
-          const hasSecretKey = !!req.headers['x-secret-key'];
-          if (!hasSecretKey && accept.includes('text/html')) {
+          const hasAuth = !!req.headers['x-secret-key'] || !!req.headers['x-session-token'];
+          if (!hasAuth && accept.includes('text/html')) {
             return '/index.html';
           }
           return null; // proxy to goosed

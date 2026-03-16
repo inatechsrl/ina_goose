@@ -1,5 +1,6 @@
 pub mod action_required;
 pub mod agent;
+pub mod auth;
 pub mod config_management;
 pub mod dictation;
 pub mod errors;
@@ -23,9 +24,10 @@ pub mod utils;
 use std::sync::Arc;
 
 use axum::Router;
+use crate::auth::AuthState;
 
 // Function to configure all routes
-pub fn configure(state: Arc<crate::state::AppState>, secret_key: String) -> Router {
+pub fn configure(state: Arc<crate::state::AppState>, auth: AuthState) -> Router {
     Router::new()
         .merge(status::routes(state.clone()))
         .merge(reply::routes(state.clone()))
@@ -42,7 +44,8 @@ pub fn configure(state: Arc<crate::state::AppState>, secret_key: String) -> Rout
         .merge(telemetry::routes(state.clone()))
         .merge(tunnel::routes(state.clone()))
         .merge(gateway::routes(state.clone()))
-        .merge(mcp_ui_proxy::routes(secret_key.clone()))
-        .merge(mcp_app_proxy::routes(secret_key))
+        .merge(auth::routes(auth.clone()))
+        .merge(mcp_ui_proxy::routes(auth.clone()))
+        .merge(mcp_app_proxy::routes(auth.clone()))
         .merge(sampling::routes(state))
 }

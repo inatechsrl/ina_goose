@@ -55,6 +55,9 @@ dirs = { workspace = true }
 rcgen = "0.13"
 axum-server = { version = "0.8.0", features = ["tls-rustls"] }
 aws-lc-rs = "1.16.0"
+sha2 = "0.10"
+jsonwebtoken = { version = "10.3.0", features = ["aws_lc_rs"] }
+dashmap = "6.1"
 
 [target.'cfg(windows)'.dependencies]
 winreg = { version = "0.55.0" }

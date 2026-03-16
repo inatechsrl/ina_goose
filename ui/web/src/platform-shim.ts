@@ -178,7 +178,9 @@ export function installPlatformShim(): void {
       saveSettings(current);
     },
 
-    getSecretKey: async () => GOOSE_SECRET_KEY,
+    getSecretKey: async () => {
+      return localStorage.getItem('goose-session-token') || null;
+    },
     getGoosedHostPort: async () => GOOSE_API_HOST,
 
     // ── Desktop-only features (no-ops) ──

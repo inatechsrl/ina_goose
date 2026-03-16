@@ -22,6 +22,7 @@ import { client } from '@desktop/api/client.gen';
 import { setTelemetryEnabled } from '@desktop/utils/analytics';
 import { readConfig } from '@desktop/api';
 import { applyThemeTokens } from '@desktop/theme/theme-tokens';
+import { LoginPage } from './LoginPage';
 
 // Apply theme tokens to :root before first paint
 applyThemeTokens();
@@ -29,6 +30,14 @@ applyThemeTokens();
 const WebApp = lazy(() => import('./WebApp'));
 
 const TELEMETRY_CONFIG_KEY = 'GOOSE_TELEMETRY_ENABLED';
+
+function renderLogin() {
+  ReactDOM.createRoot(document.getElementById('root')!).render(
+    <React.StrictMode>
+      <LoginPage />
+    </React.StrictMode>
+  );
+}
 
 (async () => {
   const gooseApiHost = await window.electron.getGoosedHostPort();
@@ -47,12 +56,18 @@ const TELEMETRY_CONFIG_KEY = 'GOOSE_TELEMETRY_ENABLED';
 
   console.log('Connecting to goosed at', gooseApiHost);
 
-  const secretKey = await window.electron.getSecretKey();
+  const sessionToken = await window.electron.getSecretKey();
+
+  if (!sessionToken) {
+    renderLogin();
+    return;
+  }
+
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
-  if (secretKey) {
-    headers['X-Secret-Key'] = secretKey;
+  if (sessionToken) {
+    headers['X-Session-Token'] = sessionToken;
   }
 
   client.setConfig({
@@ -68,6 +83,13 @@ const TELEMETRY_CONFIG_KEY = 'GOOSE_TELEMETRY_ENABLED';
     setTelemetryEnabled(isTelemetryEnabled);
   } catch (error) {
     console.warn('[Analytics] Failed to initialize analytics:', error);
+    // If the error looks like a 401, clear the token and show login
+    const errStr = String(error);
+    if (errStr.includes('401') || errStr.includes('Unauthorized')) {
+      localStorage.removeItem('goose-session-token');
+      renderLogin();
+      return;
+    }
   }
 
   ReactDOM.createRoot(document.getElementById('root')!).render(
