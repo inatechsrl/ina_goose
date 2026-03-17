@@ -121,6 +121,7 @@ pub async fn check_token(
         || path == "/mcp-app-proxy"
         || path == "/mcp-app-guest"
         || path == "/auth/login"
+        || path == "/api/topics"
     {
         return Ok(next.run(request).await);
     }

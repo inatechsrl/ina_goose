@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FolderTree, MessageSquare, Code } from 'lucide-react';
+import { getApiUrl } from '../config';
 
 interface PopularChatTopicsProps {
   append: (text: string) => void;
@@ -12,7 +13,7 @@ interface ChatTopic {
   prompt: string;
 }
 
-const POPULAR_TOPICS: ChatTopic[] = [
+const DEFAULT_TOPICS: ChatTopic[] = [
   {
     id: 'organize-photos',
     icon: <FolderTree className="w-5 h-5" />,
@@ -37,15 +38,42 @@ const POPULAR_TOPICS: ChatTopic[] = [
 ];
 
 export default function PopularChatTopics({ append }: PopularChatTopicsProps) {
+  const [topics, setTopics] = useState<ChatTopic[]>(DEFAULT_TOPICS);
+  const [title, setTitle] = useState('Popular chat topics');
+
+  useEffect(() => {
+    fetch(getApiUrl('/api/topics'))
+      .then((r) => {
+        if (!r.ok) throw new Error();
+        return r.json();
+      })
+      .then((data) => {
+        if (data.topics?.length) {
+          setTopics(
+            data.topics.map((t: { description: string; prompt: string }, i: number) => ({
+              id: `custom-${i}`,
+              icon: <MessageSquare className="w-5 h-5" />,
+              description: t.description,
+              prompt: t.prompt,
+            }))
+          );
+          if (data.title) setTitle(data.title);
+        }
+      })
+      .catch(() => {
+        /* keep defaults */
+      });
+  }, []);
+
   const handleTopicClick = (prompt: string) => {
     append(prompt);
   };
 
   return (
     <div className="absolute bottom-0 left-0 p-6 max-w-md">
-      <h3 className="text-text-secondary text-sm mb-1">Popular chat topics</h3>
+      <h3 className="text-text-secondary text-sm mb-1">{title}</h3>
       <div className="space-y-1">
-        {POPULAR_TOPICS.map((topic) => (
+        {topics.map((topic) => (
           <div
             key={topic.id}
             className="flex items-center justify-between py-1.5 hover:bg-background-secondary rounded-md cursor-pointer transition-colors"

@@ -18,6 +18,7 @@ pub mod session;
 pub mod setup;
 pub mod status;
 pub mod telemetry;
+pub mod topics;
 pub mod tunnel;
 pub mod utils;
 
@@ -48,4 +49,5 @@ pub fn configure(state: Arc<crate::state::AppState>, auth: AuthState) -> Router 
         .merge(mcp_ui_proxy::routes(auth.clone()))
         .merge(mcp_app_proxy::routes(auth.clone()))
         .merge(sampling::routes(state))
+        .merge(topics::routes())
 }
