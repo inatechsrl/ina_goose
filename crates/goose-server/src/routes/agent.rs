@@ -156,6 +156,30 @@ pub struct RestartAgentResponse {
     pub extension_results: Vec<ExtensionLoadResult>,
 }
 
+fn resolve_start_working_dir(working_dir: &str) -> Result<PathBuf, ErrorResponse> {
+    let working_dir = working_dir.trim();
+    let path = if working_dir.is_empty() {
+        match std::env::var("GOOSE_WORKING_DIR") {
+            Ok(env_dir) if !env_dir.trim().is_empty() => PathBuf::from(env_dir.trim()),
+            _ => std::env::current_dir().map_err(|err| ErrorResponse {
+                message: format!("Failed to resolve working directory: {}", err),
+                status: StatusCode::INTERNAL_SERVER_ERROR,
+            })?,
+        }
+    } else {
+        PathBuf::from(working_dir)
+    };
+
+    if !path.exists() || !path.is_dir() {
+        return Err(ErrorResponse {
+            message: format!("Invalid working directory: {}", path.display()),
+            status: StatusCode::BAD_REQUEST,
+        });
+    }
+
+    Ok(path)
+}
+
 #[utoipa::path(
     post,
     path = "/agent/start",
@@ -215,9 +239,10 @@ async fn start_agent(
     let name = "New Chat".to_string();
 
     let manager = state.session_manager();
+    let working_dir = resolve_start_working_dir(&working_dir)?;
 
     let mut session = manager
-        .create_session(PathBuf::from(&working_dir), name, SessionType::User)
+        .create_session(working_dir, name, SessionType::User)
         .await
         .map_err(|err| {
             error!("Failed to create session: {}", err);
