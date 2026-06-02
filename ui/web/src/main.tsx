@@ -30,6 +30,18 @@ applyThemeTokens();
 const WebApp = lazy(() => import('./WebApp'));
 
 const TELEMETRY_CONFIG_KEY = 'GOOSE_TELEMETRY_ENABLED';
+const SESSION_TOKEN_KEY = 'goose-session-token';
+let isClearingStaleSession = false;
+
+function clearStaleSession() {
+  if (isClearingStaleSession) {
+    return;
+  }
+  isClearingStaleSession = true;
+  localStorage.clear();
+  sessionStorage.clear();
+  window.location.reload();
+}
 
 function renderLogin() {
   ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -74,6 +86,12 @@ function renderLogin() {
     baseUrl: gooseApiHost,
     headers,
   });
+  client.interceptors.response.use((response) => {
+    if (response.status === 401 && localStorage.getItem(SESSION_TOKEN_KEY)) {
+      clearStaleSession();
+    }
+    return response;
+  });
 
   try {
     const telemetryResponse = await readConfig({
@@ -83,11 +101,10 @@ function renderLogin() {
     setTelemetryEnabled(isTelemetryEnabled);
   } catch (error) {
     console.warn('[Analytics] Failed to initialize analytics:', error);
-    // If the error looks like a 401, clear the token and show login
+    // If the error looks like a 401, reset stale browser state and retry.
     const errStr = String(error);
     if (errStr.includes('401') || errStr.includes('Unauthorized')) {
-      localStorage.removeItem('goose-session-token');
-      renderLogin();
+      clearStaleSession();
       return;
     }
   }

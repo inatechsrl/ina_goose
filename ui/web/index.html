@@ -5,6 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Agent Core</title>
     <script>
+      // Support a simple operator reset link for stale web UI auth/settings.
+      (function () {
+        var params = new URLSearchParams(window.location.search);
+        if (params.get('reset') === '1') {
+          try {
+            window.localStorage && window.localStorage.clear();
+            window.sessionStorage && window.sessionStorage.clear();
+          } catch (error) {
+            console.warn('Failed to clear browser storage:', error);
+          }
+          window.location.replace(window.location.origin + window.location.pathname);
+        }
+      })();
+    </script>
+    <script>
       // Initialize theme before any content loads to prevent flash
       (function () {
         function initializeTheme() {
